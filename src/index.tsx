@@ -16,6 +16,7 @@ export * from './effect';
 export {
   redirect,
   replace,
+  TRequest
 };
 
 export const URL_BUILD_NAME = Symbol('URL_BUILD_NAME');
