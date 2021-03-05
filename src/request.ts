@@ -14,11 +14,11 @@ export interface TRequest {
   hostname: URL['hostname'],
   port: URL['port'],
   pathname: URL['pathname'],
-  query: URL['query'],
+  query: Map<string, string>,
   hash: URL['hash'],
   href: URL['href'],
   origin: URL['origin'],
-  params: Record<string, string>,
+  params: Map<string, string>,
 }
 
 export const Request = reactive<TRequest>({
@@ -31,14 +31,14 @@ export const Request = reactive<TRequest>({
   hostname: null,
   port: null,
   pathname: null,
-  query: {},
+  query: new Map(),
   hash: null,
   href: null,
   origin: null,
-  params: {},
+  params: new Map(),
 });
 
-export function assign(url: URL, params: TRequest['params'] = {}) {
+export function assign(url: URL, params: Record<string, string> = {}) {
   Request.protocol = url.protocol;
   Request.slashes = url.slashes;
   Request.auth = url.auth;
@@ -48,11 +48,11 @@ export function assign(url: URL, params: TRequest['params'] = {}) {
   Request.hostname = url.hostname;
   Request.port = url.port;
   Request.pathname = url.pathname;
-  Request.query = url.query;
   Request.hash = url.hash;
   Request.href = url.href;
   Request.origin = url.origin;
-  Request.params = params;
+  merge(Request.query, url.query);
+  merge(Request.params, params);
   return Request;
 }
 
@@ -82,4 +82,13 @@ export function replace(url: string = '/') {
 
 export function useRequest<T>(callback: (req: TRequest) => T) {
   return useReactiveState(() => callback(Request));
+}
+
+function merge(target: Map<string, string>, data: Record<string, string>) {
+  target.clear();
+  for (const i in data) {
+    if (Object.prototype.hasOwnProperty.call(data, i)) {
+      target.set(i, data[i]);
+    }
+  }
 }
