@@ -11,8 +11,14 @@ export const useReactiveState = <S>(selector: () => S, changes?: any[]): S => {
     j.current = null;
     if (job) {
       const value = job();
-      if (value === undefined) return fn();
-      forceUpdate();
+      if (value === undefined) {
+        result = undefined;
+        return fn();
+      }
+      const oldValue = result;
+      const newValue = value;
+      result = value;
+      if (oldValue !== newValue) forceUpdate();
     }
     return fn();
   }
@@ -26,5 +32,6 @@ export const useReactiveState = <S>(selector: () => S, changes?: any[]): S => {
     },
     lazy: true,
   }, changes);
-  return effection();
+  let result = effection();
+  return result;
 }
