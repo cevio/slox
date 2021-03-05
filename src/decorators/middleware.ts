@@ -1,19 +1,19 @@
-import React, { FunctionComponent, useMemo } from 'react';
+import { FunctionComponent } from 'react';
 import { AnnotationDependenciesAutoRegister, ClassMetaCreator } from "../annotates";
+import { useComponent } from '../decorators';
 import { TComponent } from "./component";
 import { container } from '..';
-import { TRequest } from '../request';
 
-export function Middleware(component: TComponent | FunctionComponent<TRequest>) {
+export function Middleware(component: TComponent | FunctionComponent) {
   let isIOComponent = false;
   if (component.prototype && component.prototype.render) {
     AnnotationDependenciesAutoRegister(component as TComponent, container);
     isIOComponent = true;
   }
-  return ClassMetaCreator.unshift(Middleware.namespace, isIOComponent ? (props: React.PropsWithChildren<TRequest>) => {
-    const target = useMemo(() => container.get(component), [component]);
-    return React.createElement(target.render.bind(target), props, props.children);
-  } : component);
+  return ClassMetaCreator.unshift(
+    Middleware.namespace, 
+    isIOComponent ? useComponent(component as TComponent) : component
+  );
 }
 
 Middleware.namespace = Symbol('MIDDLEWARE');

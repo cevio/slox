@@ -1,11 +1,11 @@
 {
   "name": "slox",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "engines": {
     "node": ">=10.0.0"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "rm -rf dist/ && rollup -c",
     "dev": "vite"
   },
   "main": "dist/index.js",

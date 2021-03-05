@@ -1,9 +1,12 @@
 import React from 'react';
 
-export function compose<T = {}>(components: React.FunctionComponent<T>[]) {
-  return components.reduce((Prev, Next) => {
-    return (props: T) => {
-      return React.createElement(Next, props, React.createElement(Prev, props));
-    }
-  });
+export type TComponentMiddlewareProps = { Next?: TComponentMiddleware };
+export type TComponentMiddleware = React.FunctionComponent<TComponentMiddlewareProps>;
+
+export function compose(components: TComponentMiddleware[]) {
+  return () => {
+    return components.reduce((Prev: React.ReactElement, Next: React.FunctionComponent) => {
+      return React.createElement(Next, null, Prev);
+    }, null);
+  }
 }

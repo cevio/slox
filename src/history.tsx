@@ -1,13 +1,13 @@
 import Url from 'url-parse';
 import { Router } from './router';
-import { TRequest, assign } from './request';
+import { assign } from './request';
 import { setComponent } from './root';
 import { FunctionComponent } from 'react';
 
 export interface THistory {
   mode: 'hashchange' | 'popstate',
   listener: () => void,
-  notFoundComponent: FunctionComponent<TRequest>,
+  notFoundComponent: FunctionComponent,
 }
 
 export const History: THistory = {
@@ -30,7 +30,7 @@ export function createHistory(router: Router, mode: 'hashchange' | 'popstate' = 
     const matched = router.find(url.pathname);
     if (matched) {
       assign(url, matched.params);
-      setComponent(matched.handler as React.FunctionComponent<TRequest>);
+      setComponent(matched.handler as React.FunctionComponent);
     } else {
       assign(url);
       setComponent(History.notFoundComponent);

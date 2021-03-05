@@ -1,6 +1,8 @@
+import { createContext, useContext } from 'react';
 import URL from 'url-parse';
 import { reactive } from '@vue/reactivity';
 import { History } from './history';
+import { useReactiveState } from './effect';
 
 export interface TRequest {
   protocol: URL['protocol'],
@@ -76,4 +78,8 @@ export function replace(url: string = '/') {
       window.location.hash = url;
       break;
   }
+}
+
+export function useRequest<T>(callback: (req: TRequest) => T) {
+  return useReactiveState(() => callback(Request));
 }

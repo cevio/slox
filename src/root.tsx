@@ -1,23 +1,19 @@
-import React, { Fragment, PropsWithChildren, ReactElement } from 'react';
+import React, { Fragment, PropsWithChildren } from 'react';
 import { ref } from '@vue/reactivity';
 import { useReactiveState } from './effect';
-import { Request, TRequest } from './request';
 
-type TComponent = (props: PropsWithChildren<TRequest>) => ReactElement;
-
-const componentReference = ref<TComponent>(null);
+const componentReference = ref<React.FunctionComponent>(null);
 
 export function Root() {
   const ComponentRenderer = useReactiveState(() => componentReference.value || noopTemplateTransform);
-  const request = useReactiveState(() => ({...Request}));
-  return <ComponentRenderer {...request} />;
+  return <ComponentRenderer />;
 }
 
-export function setComponent(component: TComponent) {
+export function setComponent(component: React.FunctionComponent) {
   if (component === componentReference.value) return;
   componentReference.value = component;
 }
 
-function noopTemplateTransform(props: Parameters<TComponent>[0]) {
+function noopTemplateTransform(props: PropsWithChildren<{}>) {
   return <Fragment>{props.children}</Fragment>;
 }
