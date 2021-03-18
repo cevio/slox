@@ -40,7 +40,7 @@ export function AnnotationMetaDataScan<T extends TClassIndefiner<X>, X = any>(cl
 export function AnnotationDependenciesAutoRegister<T extends TClassIndefiner<X>, X = any>(classModule: T, container?: Container) {
   const injectable = Reflect.hasMetadata(METADATA_KEY.PARAM_TYPES, classModule);
   if (injectable && container && !container.isBound(classModule)) {
-    container.bind<X>(classModule).toSelf();
+    container.bind<X>(classModule).toSelf().inSingletonScope();
     const propsInjectable = Reflect.hasMetadata(METADATA_KEY.TAGGED_PROP, classModule);
     if (propsInjectable) {
       const props = Reflect.getMetadata(METADATA_KEY.TAGGED_PROP, classModule);
