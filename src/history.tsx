@@ -1,8 +1,8 @@
 import Url from 'url-parse';
 import { Router } from './router';
 import { assign } from './request';
-import { setComponent } from './root';
 import { FunctionComponent } from 'react';
+import { setComponents } from './root';
 
 export interface THistory {
   mode: 'hashchange' | 'popstate',
@@ -30,10 +30,10 @@ export function createHistory(router: Router, mode: 'hashchange' | 'popstate' = 
     const matched = router.find(url.pathname);
     if (matched) {
       assign(url, matched.params);
-      setComponent(matched.handler as React.FunctionComponent);
+      matched.handler();
     } else {
       assign(url);
-      setComponent(History.notFoundComponent);
+      setComponents([History.notFoundComponent]);
     }
     return () => window.removeEventListener(mode, listener);
   }

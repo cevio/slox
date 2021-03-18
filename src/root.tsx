@@ -1,19 +1,18 @@
-import React, { Fragment, PropsWithChildren } from 'react';
+import React, { Fragment } from 'react';
 import { ref } from '@vue/reactivity';
 import { useReactiveState } from './effect';
 
-const componentReference = ref<React.FunctionComponent>(null);
+const middlewares = ref<React.FunctionComponent[]>([]);
 
 export function Root() {
-  const ComponentRenderer = useReactiveState(() => componentReference.value || noopTemplateTransform);
-  return <ComponentRenderer />;
+  return useReactiveState(() => {
+    let next = React.createElement(Fragment);
+    let i = middlewares.value.length;
+    while (i--) next = React.createElement(middlewares.value[i], null, next);
+    return next;
+  });
 }
 
-export function setComponent(component: React.FunctionComponent) {
-  if (component === componentReference.value) return;
-  componentReference.value = component;
-}
-
-function noopTemplateTransform(props: PropsWithChildren<{}>) {
-  return <Fragment>{props.children}</Fragment>;
+export function setComponents(components: React.FunctionComponent[] = []) {
+  middlewares.value = components;
 }

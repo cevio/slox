@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { Root } from './root';
+import { Root, setComponents } from './root';
 import { Container } from 'inversify';
 import { Router } from './router';
 import { createHistory, History, THistory } from './history';
@@ -41,7 +41,7 @@ export function createServer<E extends HTMLElement = HTMLElement>(el: E, compone
   }
 
   const createRoute = (url: string, ...components: React.FunctionComponent[]) => {
-    router.on(url, compose(components.reverse()));
+    router.on(url, () => setComponents(components));
     return () => router.off(url);
   }
 
