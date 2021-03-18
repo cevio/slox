@@ -1,4 +1,3 @@
-import { createContext, useContext } from 'react';
 import URL from 'url-parse';
 import { reactive } from '@vue/reactivity';
 import { History } from './history';

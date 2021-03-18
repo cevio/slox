@@ -1,10 +1,9 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { Root, setComponents } from './root';
+import { Root, createCachedMiddlewareComponent, setPage, setMiddlewares } from './root';
 import { Container } from 'inversify';
 import { Router } from './router';
 import { createHistory, History, THistory } from './history';
-import { compose } from './compose';
 import { redirect, replace, useRequest } from './request';
 import { Controller, Middleware, TComponent, useComponent } from './decorators';
 import { AnnotationMetaDataScan } from './annotates';
@@ -29,19 +28,33 @@ const router = new Router({
 
 
 export const container = new Container();
-export function createServer<E extends HTMLElement = HTMLElement>(el: E, components: TComponent[] = []) {
+export function createServer(...components: TComponent[]) {
   if (History.mode) throw new Error('you have already bootstrap the app!');
 
-  ReactDOM.render(<Root />, el);
-
+  let middlewareSetup = false;
+  const allowMiddlewareSize = (i: number) => {
+    for (let j = 0; j < i; j++) {
+      createCachedMiddlewareComponent();
+    }
+    middlewareSetup = true;
+  }
   const createNotFoundComponent = (component: THistory['notFoundComponent']) => History.notFoundComponent = component;
-  const bootstrap = (mode: Parameters<typeof createHistory>[1]) => {
+  const bootstrap = <E extends HTMLElement = HTMLElement>(mode: Parameters<typeof createHistory>[1], el: E) => {
+    if (!middlewareSetup) allowMiddlewareSize(1);
     const subscribe = createHistory(router, mode);
+    ReactDOM.render(<Root />, el);
     return subscribe();
   }
 
   const createRoute = (url: string, ...components: React.FunctionComponent[]) => {
-    router.on(url, () => setComponents(components));
+    router.on(url, () => {
+      if (components.length > 0) {
+        const middlewares = components.slice(0, -1);
+        const page = components.slice(-1) as [React.FunctionComponent];
+        setPage(page[0]);
+        setMiddlewares(middlewares);
+      }
+    });
     return () => router.off(url);
   }
 
@@ -57,6 +70,7 @@ export function createServer<E extends HTMLElement = HTMLElement>(el: E, compone
   return {
     bootstrap,
     createRoute,
-    createNotFoundComponent
+    createNotFoundComponent,
+    allowMiddlewareSize
   }
 }

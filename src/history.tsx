@@ -2,7 +2,7 @@ import Url from 'url-parse';
 import { Router } from './router';
 import { assign } from './request';
 import { FunctionComponent } from 'react';
-import { setComponents } from './root';
+import { setMiddlewares, setPage } from './root';
 
 export interface THistory {
   mode: 'hashchange' | 'popstate',
@@ -33,7 +33,8 @@ export function createHistory(router: Router, mode: 'hashchange' | 'popstate' = 
       matched.handler();
     } else {
       assign(url);
-      setComponents([History.notFoundComponent]);
+      setPage(History.notFoundComponent);
+      setMiddlewares();
     }
     return () => window.removeEventListener(mode, listener);
   }
