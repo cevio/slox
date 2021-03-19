@@ -79,7 +79,7 @@ export function replace(url: string = '/') {
   }
 }
 
-export function useRequest<T>(callback: (req: TRequest) => T) {
+export function useLocation<T>(callback: (req: TRequest) => T) {
   return useReactiveState(() => callback(Request));
 }
 

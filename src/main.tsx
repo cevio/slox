@@ -1,7 +1,7 @@
 import React from 'react';
 import { createServer, redirect, inject } from '.';
 import { Component, Controller, Middleware, Service } from './decorators';
-import { useRequest } from './request';
+import { useLocation } from './request';
 import { Container, injectable } from 'inversify';
 
 @Service()
@@ -77,7 +77,7 @@ class test {
   @inject(sevice) private readonly service: sevice;
   render(props: React.PropsWithChildren<{}>) {
     const value = this.service.sum(9, 23);
-    const href = useRequest(req => req.href);
+    const href = useLocation(req => req.href);
     return <div>
       <button onClick={() => redirect('/api/99')}>go</button>
       {href} - {value} - {props.children}</div>
@@ -93,7 +93,7 @@ class test2 {
   @inject(sevice) private readonly service: sevice;
   render(props: React.PropsWithChildren<{}>) {
     const value = this.service.sum(9, 23);
-    const href = useRequest(req => req.href);
+    const href = useLocation(req => req.href);
     return <div>
       <button onClick={() => redirect('/')}>home</button>
       <button onClick={() => redirect('/api/' + (Math.random() * 1000).toFixed(0))}>another</button>
@@ -115,7 +115,7 @@ const {
 allowMiddlewareSize(3);
 
 createNotFoundComponent(() => {
-  const href = useRequest(req => req.pathname);
+  const href = useLocation(req => req.pathname);
   return <div>not found: {href}</div>
 })
 
