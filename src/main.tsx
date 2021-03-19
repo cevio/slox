@@ -2,6 +2,7 @@ import React from 'react';
 import { createServer, redirect, inject } from '.';
 import { Component, Controller, Middleware, Service } from './decorators';
 import { useRequest } from './request';
+import { Container, injectable } from 'inversify';
 
 @Service()
 class sevice {
@@ -10,29 +11,62 @@ class sevice {
   }
 }
 
-function A(props: React.PropsWithChildren<{}>) {
-  console.log('render A')
-  return <div>
-    <h1>this is A</h1>
-    {props.children}
-  </div>
+@Component()
+class A {
+  render(props: React.PropsWithChildren<{}>) {
+    console.log('render A')
+    return <div>
+      <h1>this is A</h1>
+      {props.children}
+    </div>
+  }
 }
 
-function B(props: React.PropsWithChildren<{}>) {
-  console.log('render B')
-  return <div>
-    <h2>this is B</h2>
-    {props.children}
-  </div>
+@Component()
+class B {
+  render(props: React.PropsWithChildren<{}>) {
+    console.log('render B')
+    return <div>
+      <h2>this is B</h2>
+      {props.children}
+    </div>
+  }
 }
 
-function C(props: React.PropsWithChildren<{}>) {
-  console.log('render C')
-  return <div>
-    <h2>this is C</h2>
-    {props.children}
-  </div>
+@Component()
+class C {
+  render(props: React.PropsWithChildren<{}>) {
+    console.log('render C')
+    return <div>
+      <h2>this is C</h2>
+      {props.children}
+    </div>
+  }
 }
+
+// function A(props: React.PropsWithChildren<{}>) {
+//   console.log('render A')
+//   return <div>
+//     <h1>this is A</h1>
+//     {props.children}
+//   </div>
+// }
+
+// function B(props: React.PropsWithChildren<{}>) {
+//   console.log('render B')
+//   return <div>
+//     <h2>this is B</h2>
+//     {props.children}
+//   </div>
+// }
+
+// function C(props: React.PropsWithChildren<{}>) {
+//   console.log('render C')
+//   return <div>
+//     <h2>this is C</h2>
+//     {props.children}
+//   </div>
+// }
 
 @Component()
 @Controller('/')
