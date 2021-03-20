@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { Fragment } from 'react';
+import ReactDOM from 'react-dom';
 import { createServer, redirect, inject } from '.';
 import { Component, Controller, Middleware, Service } from './decorators';
 import { useLocation } from './request';
-import { Container, injectable } from 'inversify';
+import { useReactiveState } from './state';
+import { ref, reactive } from '@vue/reactivity';
 
 @Service()
 class sevice {
@@ -68,6 +70,11 @@ class C {
 //   </div>
 // }
 
+const a = ref(0);
+const b = reactive({
+  a: 1
+})
+
 @Component()
 @Controller('/')
 @Middleware(A)
@@ -78,9 +85,19 @@ class test {
   render(props: React.PropsWithChildren<{}>) {
     const value = this.service.sum(9, 23);
     const href = useLocation(req => req.href);
+    const x = useReactiveState(() => {
+      return {
+        a: a.value + 2,
+        b: b.a + 3,
+      }
+    })
     return <div>
       <button onClick={() => redirect('/api/99')}>go</button>
-      {href} - {value} - {props.children}</div>
+      <button onClick={() => {
+        a.value++;
+        b.a++;
+      }}>+++</button>
+      {href} - {value} - {props.children} - x: <div>{x.a} - {x.b}</div></div>
   }
 }
 
@@ -123,3 +140,19 @@ createNotFoundComponent(() => {
 
 
 bootstrap('popstate', document.getElementById('root'));
+
+
+// const abc = ref<React.FunctionComponent>(() => <div>111</div>);
+// ReactDOM.render(<Page />, document.getElementById('root'));
+
+// function Page() {
+//   const Zpage = useReactiveState(() => abc.value);
+//   return <div>
+//     <button onClick={() => abc.value=Opage}>invoke</button>
+//     <Zpage />
+//   </div>
+// }
+
+// function Opage() {
+//   return <div>222</div>
+// }

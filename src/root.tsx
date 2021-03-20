@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { ref, Ref } from '@vue/reactivity';
-import { useReactiveState } from './effect';
+import { useReactiveState } from './state';
 
 const pageReactiveState = ref<React.FunctionComponent>(Fragment);
 const componentReactiveMiddlewares: Ref<React.FunctionComponent>[] = [];
@@ -43,7 +43,8 @@ function Middlewares(props: React.PropsWithChildren<{}>) {
 }
 
 function Page() {
-  return React.createElement(useReactiveState(() => pageReactiveState.value));
+  const page = useReactiveState(() => pageReactiveState.value);
+  return React.createElement(page);
 }
 
 function createMiddlewareCacheComponent() {

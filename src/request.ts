@@ -1,7 +1,7 @@
 import URL from 'url-parse';
 import { reactive } from '@vue/reactivity';
 import { History } from './history';
-import { useReactiveState } from './effect';
+import { useReactiveState } from './state';
 
 export interface TRequest {
   protocol: URL['protocol'],
