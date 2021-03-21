@@ -4,7 +4,7 @@ import { Root, createCachedMiddlewareComponent, setPage, setMiddlewares } from '
 import { Container } from 'inversify';
 import { Router } from './router';
 import { createHistory, History, THistory } from './history';
-import { redirect, replace, useLocation } from './request';
+import { redirect, replace, useLocation, useQuery, useParam } from './request';
 import { Controller, Middleware, TComponent, useComponent } from './decorators';
 import { AnnotationMetaDataScan } from './annotates';
 
@@ -18,7 +18,9 @@ export * from './promise';
 export {
   redirect, 
   replace,
-  useLocation
+  useLocation,
+  useQuery,
+  useParam,
 }
 
 const router = new Router({

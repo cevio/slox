@@ -83,6 +83,14 @@ export function useLocation<T>(callback: (req: TRequest) => T) {
   return useReactiveState(() => callback(Request));
 }
 
+export function useQuery(key: string, defaultValue?: string) {
+  return useLocation(req => (req.query.has(key) ? req.query.get(key) : defaultValue || null));
+}
+
+export function useParam(key: string, defaultValue?: string) {
+  return useLocation(req => (req.params.has(key) ? req.params.get(key) : defaultValue || null));
+}
+
 function merge(target: Map<string, string>, data: Record<string, string>) {
   target.clear();
   for (const i in data) {
