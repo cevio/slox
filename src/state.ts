@@ -8,23 +8,22 @@ export function useReactiveState<T>(fn: () => T) {
     let job: ReactiveEffect<T>;
     let ring = false;
     let unmounting = false;
-    const scheduler = () => {
-      if (ring || unmounting) return;
+    const scheduler = (ob: ReactiveEffect<T>) => {
+      job = ob;
+      if (ring) return;
       ring = true;
       nextTick(() => {
-        dispatch(job());
+        if (!unmounting) {
+          dispatch(job());
+        }
         ring = false;
       });
     }
     const _effect = effect(fn, {
       lazy: true,
-      scheduler: getter => {
-        job = getter;
-        scheduler();
-      },
+      scheduler,
     });
-    job = _effect;
-    scheduler();
+    scheduler(_effect);
     return () => {
       unmounting = true;
       stop(_effect);
