@@ -5,6 +5,8 @@ import { Component, Controller, Middleware, Service } from './decorators';
 import { useLocation } from './request';
 import { useReactiveState } from './state';
 import { ref, reactive } from '@vue/reactivity';
+import { usePromise } from './promise';
+import axios from 'axios';
 
 @Service()
 class sevice {
@@ -75,6 +77,8 @@ const b = reactive({
   a: 1
 })
 
+const cancelToken = axios.CancelToken;
+
 @Component()
 @Controller('/')
 @Middleware(A)
@@ -91,6 +95,15 @@ class test {
         b: b.a + 3,
       }
     })
+
+    const [loading, result, error] = usePromise((resolve, reject) => {
+      const source = cancelToken.source();
+      axios.get('/os/antvdemo/assets/data/antv-keywords.json', {
+        cancelToken: source.token
+      }).then(resolve).catch(reject);
+      return () => source.cancel();
+    }, null, []);
+    console.log(loading, result, error)
     return <div>
       <button onClick={() => redirect('/api/99')}>go</button>
       <button onClick={() => {

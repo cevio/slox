@@ -3,7 +3,7 @@ import { effect, stop, ReactiveEffect } from '@vue/reactivity';
 import nextTick from "next-tick";
 
 export function useReactiveState<T>(fn: () => T) {
-  const [state, dispatch] = useReducer((state: T, action: T) => action || state, fn());
+  const [state, dispatch] = useReducer((state: T, action: T) => action, fn());
   useEffect(() => {
     const _effect = effect(fn, {
       lazy: true,
