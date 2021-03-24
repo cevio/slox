@@ -1,5 +1,4 @@
-import React, { Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react';
 import { createServer, redirect, inject } from '.';
 import { Component, Controller, Middleware, Service } from './decorators';
 import { useLocation } from './request';
@@ -103,7 +102,7 @@ class test {
       }).then(resolve).catch(reject);
       return () => source.cancel();
     }, null, []);
-    console.log(loading, result, error)
+    // console.log(loading, result, error)
     return <div>
       <button onClick={() => redirect('/api/99')}>go</button>
       <button onClick={() => {

@@ -1,6 +1,5 @@
 import { useEffect, useReducer } from "react";
 import { effect, stop, ReactiveEffect } from '@vue/reactivity';
-import nextTick from "next-tick";
 
 export function useReactiveState<T>(fn: () => T) {
   const [state, dispatch] = useReducer((state: T, action: T) => action, fn());
