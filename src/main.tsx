@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createServer, redirect, inject } from '.';
 import { Component, Controller, Middleware, Service } from './decorators';
 import { useLocation } from './request';
@@ -80,9 +80,9 @@ const cancelToken = axios.CancelToken;
 
 @Component()
 @Controller('/')
-@Middleware(A)
-@Middleware(B)
-@Middleware(C)
+// @Middleware(A)
+// @Middleware(B)
+// @Middleware(C)
 class test {
   @inject(sevice) private readonly service: sevice;
   render(props: React.PropsWithChildren<{}>) {
@@ -102,6 +102,12 @@ class test {
       }).then(resolve).catch(reject);
       return () => source.cancel();
     }, null, []);
+
+    console.log(result)
+
+    const [k, setK] = useConstom();
+
+
     // console.log(loading, result, error)
     return <div>
       <button onClick={() => redirect('/api/99')}>go</button>
@@ -109,15 +115,16 @@ class test {
         a.value++;
         b.a++;
       }}>+++</button>
-      {href} - {value} - {props.children} - x: <div>{x.a} - {x.b}</div></div>
+      <button onClick={() => setK(k + 1)}>k++</button>
+      {href} - {value} - {props.children} - x: <div>{x.a} - {x.b} - {k}</div></div>
   }
 }
 
 @Component()
 @Controller('/api/:id(\\d+)')
-@Middleware(A)
-@Middleware(B)
-@Middleware(C)
+// @Middleware(A)
+// @Middleware(B)
+// @Middleware(C)
 class test2 {
   @inject(sevice) private readonly service: sevice;
   render(props: React.PropsWithChildren<{}>) {
@@ -135,23 +142,26 @@ class test2 {
 const { 
   bootstrap, 
   createNotFoundComponent, 
-  allowMiddlewareSize 
-} = createServer(
-  test,
-  test2
-);
+  allowMiddlewareSize,
+  useGlobalMiddlewares,
+  defineController,
+} = createServer();
 
 allowMiddlewareSize(3);
+useGlobalMiddlewares(A, B, C);
+defineController(test, test2)
 
 createNotFoundComponent(() => {
   const href = useLocation(req => req.pathname);
   return <div>not found: {href}</div>
 })
 
-
-
-
 bootstrap('popstate', document.getElementById('root'));
+
+function useConstom(): [number, React.Dispatch<React.SetStateAction<number>>] {
+  const [a, setA] = useState(0)
+  return [a, setA];
+}
 
 
 // const abc = ref<React.FunctionComponent>(() => <div>111</div>);

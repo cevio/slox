@@ -5,8 +5,8 @@ import { Container } from 'inversify';
 import { Router } from './router';
 import { createHistory, History, THistory } from './history';
 import { redirect, replace, useLocation, useQuery, useParam } from './request';
-import { Controller, Middleware, TComponent, useComponent } from './decorators';
-import { AnnotationMetaDataScan } from './annotates';
+import { Controller, isIocComponent, Middleware, TComponent, useComponent } from './decorators';
+import { AnnotationDependenciesAutoRegister, AnnotationMetaDataScan } from './annotates';
 
 export * from 'inversify';
 export * from '@vue/reactivity';
@@ -31,8 +31,27 @@ const router = new Router({
 
 
 export const container = new Container();
-export function createServer(...components: TComponent[]) {
+export function createServer() {
   if (History.mode) throw new Error('you have already bootstrap the app!');
+
+  const globalMiddlewares: React.FunctionComponent[] = [];
+  const controllers: Set<TComponent> = new Set();
+
+  const useGlobalMiddlewares = (...mids: Parameters<typeof Middleware>[0][]) => {
+    globalMiddlewares.push(...mids.map(m => {
+      if (isIocComponent(m as TComponent)) {
+        AnnotationDependenciesAutoRegister(m as TComponent, container);
+      }
+      return useComponent(m);
+    }));
+  }
+
+  const defineController = (...controls: TComponent[]) => {
+    controls.forEach(control => {
+      AnnotationDependenciesAutoRegister(control, container);
+      controllers.add(control);
+    });
+  }
 
   let middlewareSetup = false;
   const allowMiddlewareSize = (i: number) => {
@@ -43,6 +62,7 @@ export function createServer(...components: TComponent[]) {
   }
   const createNotFoundComponent = (component: THistory['notFoundComponent']) => History.notFoundComponent = component;
   const bootstrap = <E extends HTMLElement = HTMLElement>(mode: Parameters<typeof createHistory>[1], el: E) => {
+    buildControllers();
     if (!middlewareSetup) allowMiddlewareSize(1);
     const subscribe = createHistory(router, mode);
     ReactDOM.render(<Root />, el);
@@ -61,19 +81,25 @@ export function createServer(...components: TComponent[]) {
     return () => router.off(url);
   }
 
-  components.forEach(component => {
-    const meta = AnnotationMetaDataScan(component, container);
-    const controller = meta.meta.get<string>(Controller.namespace);
-    if (!controller) return;
-    const middlewares = meta.meta.got(Middleware.namespace, []);
-    middlewares.push(useComponent(component));
-    return createRoute(controller, ...middlewares);
-  });
+  const buildControllers = () => {
+    controllers.forEach(component => {
+      const meta = AnnotationMetaDataScan(component, container);
+      const controller = meta.meta.get<string>(Controller.namespace);
+      if (!controller) return;
+      const controllerMiddlewares = meta.meta.got(Middleware.namespace, []);
+      const middlewares = globalMiddlewares.concat(controllerMiddlewares);
+      console.log(globalMiddlewares.length, controllerMiddlewares.length, middlewares.length, 'middlewares')
+      middlewares.push(useComponent(component));
+      return createRoute(controller, ...middlewares);
+    });
+  }
 
   return {
     bootstrap,
     createRoute,
     createNotFoundComponent,
-    allowMiddlewareSize
+    allowMiddlewareSize,
+    useGlobalMiddlewares,
+    defineController,
   }
 }

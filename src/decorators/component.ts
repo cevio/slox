@@ -33,11 +33,21 @@ export function useComponent<T, C = any>(component: TComponent<T> | { render: Re
       return componentBindContext(context.render, context);
     } else if (typeof ctx === 'object') {
       return componentBindContext(component as React.FunctionComponent, ctx);
+    } else {
+      return component as React.FunctionComponent<T>;
     }
   } else if (typeof component === 'object' && component.render) {
     return componentBindContext(component.render, component);
   }
   throw new Error('useComponent argument must be a class or object or react.functioncomponent');
+}
+
+export function isIocComponent(component: TComponent) {
+  let isIOComponent = false;
+  if (component.prototype && component.prototype.render) {
+    isIOComponent = true;
+  }
+  return isIOComponent;
 }
 
 function componentBindContext<T, C>(fn: React.FunctionComponent<T>, context: C): React.FunctionComponent<T> {
