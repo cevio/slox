@@ -88,7 +88,6 @@ export function createServer() {
       if (!controller) return;
       const controllerMiddlewares = meta.meta.got(Middleware.namespace, []);
       const middlewares = globalMiddlewares.concat(controllerMiddlewares);
-      console.log(globalMiddlewares.length, controllerMiddlewares.length, middlewares.length, 'middlewares')
       middlewares.push(useComponent(component));
       return createRoute(controller, ...middlewares);
     });
