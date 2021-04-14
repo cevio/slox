@@ -11,11 +11,27 @@ export function usePromise<T>(
   const [result, setResult] = useReducer((state: T, action: T) => action, initialState);
   const [error, setError] = useReducer((state: any, action: any) => action, null);
   useEffect(() => {
-    let cancel: TUnMounted;
+    let cancel: TUnMounted, unmounted = false;
     setLoading(true);
     const promise = new Promise<T>((resolve, reject) => cancel = fn(resolve, reject));
-    promise.then(setResult).catch(setError).finally(() => setLoading(false));
-    return cancel;
+    promise.then(v => {
+      if (!unmounted) {
+        setResult(v);
+      }
+    }).catch(e => {
+      if (!unmounted) {
+        setError(e);
+      }
+    }).finally(() => {
+      if (!unmounted) {
+        setLoading(false);
+      }
+    });
+    return () => {
+      unmounted = true;
+      // @ts-ignore
+      cancel();
+    };
   }, deps);
   return [loading, result, error];
 }
