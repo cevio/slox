@@ -5,8 +5,8 @@ export function useReactiveState<T>(fn: () => T) {
   const [state, dispatch] = useReducer((state: T, action: T) => action, fn());
   useEffect(() => {
     let unmounted = false;
-    const useSafeDispatch = (job: ReactiveEffect<T>) => {
-      if (unmounted) return;
+    const useSafeDispatch = (job?: ReactiveEffect<T>) => {
+      if (unmounted || !job || typeof job !== 'function') return;
       const value = job();
       if (value === undefined) return;
       dispatch(value);
