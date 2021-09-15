@@ -6,7 +6,8 @@ export function useReactiveState<T>(fn: () => T) {
   useEffect(() => {
     let unmounted = false;
     const useSafeDispatch = (job?: ReactiveEffect<T>) => {
-      if (unmounted || !job || typeof job !== 'function') return;
+      if (unmounted) return;
+      if (job === undefined) return dispatch(fn());
       const value = job();
       if (value === undefined) return;
       dispatch(value);
