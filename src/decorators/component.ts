@@ -1,7 +1,8 @@
 import React from 'react';
 import { ClassMetaCreator } from '../annotates';
-import { injectable, interfaces } from 'inversify';
+import { injectable } from 'inversify';
 import { container } from '..';
+import { TComponent } from '../interface';
 
 const placeholder = Symbol('React.FunctionComponent.Cached.Placeholder');
 
@@ -22,10 +23,6 @@ export function Service() {
 Component.namespace = Symbol('COMPONENT');
 Service.namespace = Symbol('SERVICE');
 
-export type TComponent<T = {}> = interfaces.Newable<{
-  render: React.FunctionComponent<T>
-}>
-
 export function useComponent<T, C = any>(component: TComponent<T> | { render: React.FunctionComponent<T> } | React.FunctionComponent<T>, ctx?: C): React.FunctionComponent<T> {
   if (typeof component === 'function') {
     if (component.prototype && component.prototype.render) {
@@ -42,7 +39,7 @@ export function useComponent<T, C = any>(component: TComponent<T> | { render: Re
   throw new Error('useComponent argument must be a class or object or react.functioncomponent');
 }
 
-export function isIocComponent(component: TComponent) {
+export function isIocComponent<T>(component: TComponent<T>) {
   let isIOComponent = false;
   if (component.prototype && component.prototype.render) {
     isIOComponent = true;

@@ -16,10 +16,10 @@ class sevice {
 
 @Component()
 class A {
-  render(props: React.PropsWithChildren<{}>) {
+  render(props: React.PropsWithChildren<{ text: string }>) {
     console.log('render A')
     return <div>
-      <h1>this is A</h1>
+      <h1>this is A - {props.text}</h1>
       {props.children}
     </div>
   }
@@ -27,7 +27,7 @@ class A {
 
 @Component()
 class B {
-  render(props: React.PropsWithChildren<{}>) {
+  render(props: React.PropsWithChildren<{ text: string }>) {
     console.log('render B')
     return <div>
       <h2>this is B</h2>
@@ -38,7 +38,7 @@ class B {
 
 @Component()
 class C {
-  render(props: React.PropsWithChildren<{}>) {
+  render(props: React.PropsWithChildren<{ text: string }>) {
     console.log('render C')
     return <div>
       <h2>this is C</h2>
@@ -80,7 +80,7 @@ const cancelToken = axios.CancelToken;
 
 @Component()
 @Controller('/')
-// @Middleware(A)
+@Middleware(A, { text: '1' })
 // @Middleware(B)
 // @Middleware(C)
 class test {
@@ -122,7 +122,7 @@ class test {
 
 @Component()
 @Controller('/api/:id(\\d+)')
-// @Middleware(A)
+@Middleware(A, { text: '2' })
 // @Middleware(B)
 // @Middleware(C)
 class test2 {
@@ -142,13 +142,13 @@ class test2 {
 const { 
   bootstrap, 
   createNotFoundComponent, 
-  allowMiddlewareSize,
   useGlobalMiddlewares,
   defineController,
 } = createServer();
 
-allowMiddlewareSize(3);
-useGlobalMiddlewares(A, B, C);
+useGlobalMiddlewares(A, { text: 'A'});
+useGlobalMiddlewares(B, { text: 'B'});
+useGlobalMiddlewares(C, { text: 'C'});
 defineController(test, test2)
 
 createNotFoundComponent(() => {

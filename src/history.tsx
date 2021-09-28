@@ -2,7 +2,7 @@ import Url from 'url-parse';
 import { Router } from './router';
 import { assign } from './request';
 import { FunctionComponent } from 'react';
-import { setMiddlewares, setPage } from './root';
+import { TMiddlewareState } from './interface';
 
 export interface THistory {
   mode: 'hashchange' | 'popstate',
@@ -16,7 +16,11 @@ export const History: THistory = {
   notFoundComponent: () => null,
 }
 
-export function createHistory(router: Router, mode: 'hashchange' | 'popstate' = 'hashchange') {
+export function createHistory(
+  router: Router, 
+  mode: 'hashchange' | 'popstate' = 'hashchange', 
+  set: React.Dispatch<React.SetStateAction<TMiddlewareState<any>[]>>
+) {
   if (mode === 'popstate') {
     if (!window.history.pushState || window.location.protocol.toLowerCase().indexOf('file:') === 0) {
       mode = 'hashchange';
@@ -33,8 +37,7 @@ export function createHistory(router: Router, mode: 'hashchange' | 'popstate' = 
       matched.handler();
     } else {
       assign(url);
-      setPage(History.notFoundComponent);
-      setMiddlewares();
+      set([{ middleware: History.notFoundComponent }]);
     }
     return () => window.removeEventListener(mode, listener);
   }
