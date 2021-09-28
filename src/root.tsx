@@ -6,7 +6,6 @@ export function Root(props: React.PropsWithoutRef<{ bootstrap: (setMiddlewares: 
   let next = React.createElement(Fragment);
   let i = middlewares.length;
   while (i--) {
-    console.log(middlewares[i])
     next = React.createElement(middlewares[i].middleware, middlewares[i].props || {}, next);
   }
   useEffect(() => props.bootstrap(setMiddlewares), [props.bootstrap]);
