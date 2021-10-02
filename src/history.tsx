@@ -19,7 +19,7 @@ export const History: THistory = {
 export function createHistory(
   router: Router, 
   mode: 'hashchange' | 'popstate' = 'hashchange', 
-  set: React.Dispatch<React.SetStateAction<TMiddlewareState<any>[]>>
+  set: React.Dispatch<React.SetStateAction<TMiddlewareState<any, any>[]>>
 ) {
   if (mode === 'popstate') {
     if (!window.history.pushState || window.location.protocol.toLowerCase().indexOf('file:') === 0) {

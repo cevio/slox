@@ -5,9 +5,9 @@ import { Container } from 'inversify';
 import { Router } from './router';
 import { createHistory, History, THistory } from './history';
 import { redirect, replace, useLocation, useQuery, useParam } from './request';
-import { Controller, isIocComponent, Middleware, useComponent } from './decorators';
+import { Controller, isIocComponent, Middleware, useComponentWithClass } from './decorators';
 import { AnnotationDependenciesAutoRegister, AnnotationMetaDataScan } from './annotates';
-import { TComponent, TSloxComponent, GetSloxProps, TMiddlewareState } from './interface';
+import { TComponent, TSloxComponent, GetSloxProps, TMiddlewareState, TClassComponent } from './interface';
 
 export * from 'inversify';
 export * from '@vue/reactivity';
@@ -35,20 +35,21 @@ export const container = new Container();
 export function createServer() {
   if (History.mode) throw new Error('you have already bootstrap the app!');
 
-  const globalMiddlewares: TMiddlewareState<any>[] = [];
-  const controllers: Set<TComponent> = new Set();
+  const globalMiddlewares: TMiddlewareState<any, any>[] = [];
+  const controllers: Set<TClassComponent<any, any>> = new Set();
 
-  function useGlobalMiddlewares<T>(m: TSloxComponent<T>, p?: GetSloxProps<TSloxComponent<T>>) {
-    if (isIocComponent(m as TComponent<T>)) {
-      AnnotationDependenciesAutoRegister(m as TComponent<T>, container);
+  function useGlobalMiddlewares<T, O>(m: TSloxComponent<T, O>, p?: GetSloxProps<TSloxComponent<T, O>, O>) {
+    const isIoc = isIocComponent(m as TClassComponent<T, O>);
+    if (isIoc) {
+      AnnotationDependenciesAutoRegister(m as TClassComponent<T, O>, container);
     }
     globalMiddlewares.push({
-      middleware: useComponent(m),
+      middleware: isIoc ? useComponentWithClass(m as TClassComponent<T, O>) : m as TComponent<T, O>,
       props: p
     });
   }
 
-  const defineController = (...controls: TComponent[]) => {
+  const defineController = (...controls: TClassComponent<any, any>[]) => {
     controls.forEach(control => {
       AnnotationDependenciesAutoRegister(control, container);
       controllers.add(control);
@@ -57,7 +58,7 @@ export function createServer() {
 
   const createNotFoundComponent = (component: THistory['notFoundComponent']) => History.notFoundComponent = component;
   const bootstrap = <E extends HTMLElement = HTMLElement>(mode: Parameters<typeof createHistory>[1], el: E) => {
-    const setup = (set: React.Dispatch<React.SetStateAction<TMiddlewareState<any>[]>>) => {
+    const setup = (set: React.Dispatch<React.SetStateAction<TMiddlewareState<any, any>[]>>) => {
       buildControllers(set);
       const subscribe = createHistory(router, mode, set);
       return subscribe();
@@ -65,14 +66,14 @@ export function createServer() {
     ReactDOM.render(<Root bootstrap={setup} />, el);
   }
 
-  const buildControllers = (set: React.Dispatch<React.SetStateAction<TMiddlewareState<any>[]>>) => {
+  const buildControllers = (set: React.Dispatch<React.SetStateAction<TMiddlewareState<any, any>[]>>) => {
     const cache = new Map<any, any>();
     controllers.forEach(component => {
       const meta = AnnotationMetaDataScan(component, container);
       const controller = meta.meta.get<string>(Controller.namespace);
       if (!controller) return;
-      const controllerMiddlewares = meta.meta.got<TMiddlewareState<any>[]>(Middleware.namespace, []);
-      const middlewares: TMiddlewareState<any>[] = globalMiddlewares.concat(controllerMiddlewares).map(middleware => {
+      const controllerMiddlewares = meta.meta.got<TMiddlewareState<any, any>[]>(Middleware.namespace, []);
+      const middlewares: TMiddlewareState<any, any>[] = globalMiddlewares.concat(controllerMiddlewares).map(middleware => {
         if (!cache.has(middleware.middleware)) {
           cache.set(middleware.middleware, React.memo(middleware.middleware))
         }
@@ -82,7 +83,7 @@ export function createServer() {
           props: middleware.props,
         }
       });
-      middlewares.push({ middleware: useComponent(component) });
+      middlewares.push({ middleware: useComponentWithClass(component) });
       router.on(controller, () => set(middlewares));
     });
   }

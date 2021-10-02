@@ -1,16 +1,21 @@
 import { AnnotationDependenciesAutoRegister, ClassMetaCreator } from "../annotates";
-import { useComponent } from '../decorators';
+import { useComponentWithClass } from '../decorators';
 import { isIocComponent } from './component';
-import { container } from '..';
-import { TComponent, TSloxComponent, GetSloxProps } from '../interface';
+import { container, TClassComponent } from '..';
+import { TSloxComponent, GetSloxProps } from '../interface';
 
-export function Middleware<T>(component: TSloxComponent<T>, options?: GetSloxProps<TSloxComponent<T>>) {
-  const isIoc = isIocComponent(component as TComponent);
-  if (isIoc) AnnotationDependenciesAutoRegister(component as TComponent, container);
+export function Middleware<T, O>(component: TSloxComponent<T, O>, options?: GetSloxProps<TSloxComponent<T, O>, O>) {
+  const isIoc = isIocComponent(component as TClassComponent<T, O>);
+  if (isIoc) AnnotationDependenciesAutoRegister(component as TClassComponent<T, O>, container);
   return ClassMetaCreator.unshift(
     Middleware.namespace, 
     isIoc 
-      ? { middleware: useComponent(component as TComponent), props: options } 
+      ? { 
+          middleware: isIoc 
+            ? useComponentWithClass(component as TClassComponent<T, O>) 
+            : component, 
+          props: options 
+        } 
       : { middleware: component, props: options }
   );
 }
