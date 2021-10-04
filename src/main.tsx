@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, { Fragment, useImperativeHandle, useRef, useState } from 'react';
 import { createServer, redirect, inject, Memo, ForwardRef, useComponentWithMethod, useComponent } from '.';
 import { Component, Controller, Middleware, Service } from './decorators';
 import { useLocation } from './request';
@@ -16,9 +16,12 @@ import axios from 'axios';
 
 @Component()
 class A {
-  render(props: React.PropsWithChildren<{ text: string }>) {
+  @ForwardRef()
+  render(props: React.PropsWithChildren<{ text: string }>, ref: React.ForwardedRef<HTMLDivElement>) {
     console.log('render A')
-    return <div>
+    const domRef = useRef<HTMLDivElement>(null);
+    useImperativeHandle(ref, () => domRef.current);
+    return <div ref={domRef}>
       <h1>this is A - {props.text}</h1>
       {props.children}
     </div>
@@ -29,27 +32,27 @@ class A {
   }
 }
 
-@Component()
-class B {
-  render(props: React.PropsWithChildren<{ text: string }>) {
-    console.log('render B')
-    return <div>
-      <h2>this is B</h2>
-      {props.children}
-    </div>
-  }
-}
+// @Component()
+// class B {
+//   render(props: React.PropsWithChildren<{ text: string }>) {
+//     console.log('render B')
+//     return <div>
+//       <h2>this is B</h2>
+//       {props.children}
+//     </div>
+//   }
+// }
 
-@Component()
-class C {
-  render(props: React.PropsWithChildren<{ text: string }>) {
-    console.log('render C')
-    return <div>
-      <h2>this is C</h2>
-      {props.children}
-    </div>
-  }
-}
+// @Component()
+// class C {
+//   render(props: React.PropsWithChildren<{ text: string }>) {
+//     console.log('render C')
+//     return <div>
+//       <h2>this is C</h2>
+//       {props.children}
+//     </div>
+//   }
+// }
 
 // function A(props: React.PropsWithChildren<{}>) {
 //   console.log('render A')
@@ -82,37 +85,28 @@ class C {
 
 // const cancelToken = axios.CancelToken;
 
-const XXX = React.forwardRef<HTMLInputElement, { a: number}>((e, r) => {
-  return <input type="text" ref={r} />
-})
-
 @Component()
 @Controller('/')
 @Middleware(A, { text: '1' })
-@Middleware(B)
-@Middleware(C)
+// @Middleware(B)
+// @Middleware(C)
 class test {
   // @inject(sevice) private readonly service: sevice;
   @inject(A) private readonly A: A;
   @Memo()
   render(props: React.PropsWithChildren<{}>) {
-    const ref = useRef<HTMLInputElement>(null);
-    const AAA = useComponentWithMethod(this.aaa, this);
-    const BBB = useComponentWithMethod(this.bbb, this);
+    const ref = useRef<HTMLDivElement>(null);
     const CCC = useComponent(this.A);
-    const DDD = useComponentWithMethod(this.A.kkk, this.A);
+
     const onClick = () => {
       console.log(ref)
       if (ref.current) {
-        ref.current.focus();
+        ref.current.style.cssText = 'background: red';
       }
     }
     return <Fragment>
       <div onClick={onClick}>dsfa</div>
-      <BBB a={2} />
-      <AAA ref={ref} a={1} />
-      <CCC text="xxx" />
-      <DDD />
+      <CCC text="xxx" ref={ref} />
     </Fragment>
   }
 
@@ -152,9 +146,9 @@ const {
   defineController,
 } = createServer();
 
-useGlobalMiddlewares(A, { text: 'A'});
-useGlobalMiddlewares(B, { text: 'B'});
-useGlobalMiddlewares(C, { text: 'C'});
+// useGlobalMiddlewares(A, { text: 'A'});
+// useGlobalMiddlewares(B, { text: 'B'});
+// useGlobalMiddlewares(C, { text: 'C'});
 defineController(test)
 
 createNotFoundComponent(() => {

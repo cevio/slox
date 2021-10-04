@@ -3,20 +3,23 @@ import { ClassMetaCreator, MethodMetaCreator } from '../annotates';
 import { injectable } from 'inversify';
 import { container, TClassComponent } from '..';
 import { TComponent } from '../interface';
+import { classScan } from './scan';
 
 const placeholder = Symbol('React.FunctionComponent.Cached.Placeholder');
 
 export function Component() {
   return ClassMetaCreator.join(
     ClassMetaCreator.define(Component.namespace, true),
-    injectable()
+    injectable(),
+    classScan
   )
 }
 
 export function Service() {
   return ClassMetaCreator.join(
     ClassMetaCreator.define(Service.namespace, true),
-    injectable()
+    injectable(),
+    classScan
   )
 }
 
@@ -55,12 +58,15 @@ function componentBindContext<T, C, O>(fn: TComponent<T, O>, context: C): O exte
   if (!fn[placeholder]) {
     // @ts-ignore
     fn[placeholder] = fn.bind(context);
-    const proto = context.constructor.prototype;
-    const instance = MethodMetaCreator.instance(Object.getOwnPropertyDescriptor(proto, fn.name));
-    if (instance.has(WrapNamespace)) {
-      const wraper = instance.get(WrapNamespace);
-      // @ts-ignore
-      fn[placeholder] = wraper(fn[placeholder]);
+    // @ts-ignore
+    const descriptor: TypedPropertyDescriptor<any> = fn.__descriptor__;
+    if (descriptor) {
+      const instance = MethodMetaCreator.instance(descriptor);
+      if (instance.has(WrapNamespace)) {
+        const wraper = instance.get(WrapNamespace);
+        // @ts-ignore
+        fn[placeholder] = wraper(fn[placeholder]);
+      }
     }
   }
   // @ts-ignore
