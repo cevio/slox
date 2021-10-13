@@ -1,10 +1,7 @@
 import 'reflect-metadata';
 
-export class ClassMetaCreator {
-	static namespace = Symbol('metadata.class.namespace');
-	static initializeNamespace = Symbol('meta.class.initialize.namespace');
+export class ClassMetaNode {
 	private readonly stacks: Map<string | symbol, any> = new Map();
-
 	set<T = any>(key: string | symbol, value: T) {
     this.stacks.set(key, value);
     return this;
@@ -30,7 +27,11 @@ export class ClassMetaCreator {
 		if (this.has(name)) return this.get<R>(name);
 		return defaultValue;
 	}
-	
+}
+
+export class ClassMetaCreator {
+	static namespace = Symbol('metadata.class.namespace');
+	public readonly stacks: Map<Object, ClassMetaNode> = new Map();
 	static instance(obj: Object) {
 		let meta: ClassMetaCreator;
 		if (!Reflect.hasMetadata(ClassMetaCreator.namespace, obj)) {
@@ -39,7 +40,10 @@ export class ClassMetaCreator {
 		} else {
 			meta = Reflect.getMetadata(ClassMetaCreator.namespace, obj) as ClassMetaCreator;
 		}
-		return meta;
+		if (!meta.stacks.has(obj)) {
+			meta.stacks.set(obj, new ClassMetaNode());
+		}
+		return meta.stacks.get(obj);
 	}
 
 	static define<T = any>(key: string | symbol, value: T): ClassDecorator {

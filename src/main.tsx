@@ -7,30 +7,30 @@ import { ref, reactive } from '@vue/reactivity';
 import { usePromise } from './promise';
 import axios from 'axios';
 
-// @Service()
-// class sevice {
-//   sum(a: number, b: number) {
-//     return a + b;
-//   }
-// }
-
-@Component()
-class A {
-  @ForwardRef()
-  render(props: React.PropsWithChildren<{ text: string }>, ref: React.ForwardedRef<HTMLDivElement>) {
-    console.log('render A')
-    const domRef = useRef<HTMLDivElement>(null);
-    useImperativeHandle(ref, () => domRef.current);
-    return <div ref={domRef}>
-      <h1>this is A - {props.text}</h1>
-      {props.children}
-    </div>
-  }
-
-  kkk() {
-    return <div>kkk</div>
+@Service()
+class sevice {
+  sum(a: number, b: number) {
+    return a + b;
   }
 }
+
+// @Component()
+// class A {
+//   @ForwardRef()
+//   render(props: React.PropsWithChildren<{ text: string }>, ref: React.ForwardedRef<HTMLDivElement>) {
+//     console.log('render A')
+//     const domRef = useRef<HTMLDivElement>(null);
+//     useImperativeHandle(ref, () => domRef.current);
+//     return <div ref={domRef}>
+//       <h1>this is A - {props.text}</h1>
+//       {props.children}
+//     </div>
+//   }
+
+//   kkk() {
+//     return <div>kkk</div>
+//   }
+// }
 
 // @Component()
 // class B {
@@ -87,27 +87,15 @@ class A {
 
 @Component()
 @Controller('/')
-@Middleware(A, { text: '1' })
+// @Middleware(A, { text: '1' })
 // @Middleware(B)
 // @Middleware(C)
-class test {
+class test extends sevice {
   // @inject(sevice) private readonly service: sevice;
-  @inject(A) private readonly A: A;
+  // @inject(A) private readonly A: A;
   @Memo()
   render(props: React.PropsWithChildren<{}>) {
-    const ref = useRef<HTMLDivElement>(null);
-    const CCC = useComponent(this.A);
-
-    const onClick = () => {
-      console.log(ref)
-      if (ref.current) {
-        ref.current.style.cssText = 'background: red';
-      }
-    }
-    return <Fragment>
-      <div onClick={onClick}>dsfa</div>
-      <CCC text="xxx" ref={ref} />
-    </Fragment>
+    return <div>dsafx</div>
   }
 
   @ForwardRef()
@@ -120,24 +108,17 @@ class test {
   }
 }
 
-// @Component()
-// @Controller('/api/:id(\\d+)')
+@Component()
+@Controller('/test')
 // @Middleware(A, { text: '2' })
-// // @Middleware(B)
-// // @Middleware(C)
-// class test2 {
-//   @inject(sevice) private readonly service: sevice;
-//   render(props: React.PropsWithChildren<{}>) {
-//     const value = this.service.sum(9, 23);
-//     const href = useLocation(req => req.href);
-//     return <div>
-//       <button onClick={() => redirect('/')}>home</button>
-//       <button onClick={() => redirect('/api/' + (Math.random() * 1000).toFixed(0))}>another</button>
-//       <button onClick={() => redirect('/99aofsa')}>not found</button>
-//       {href} - {value} - {props.children}
-//     </div>
-//   }
-// }
+// @Middleware(B)
+// @Middleware(C)
+class test2 extends sevice {
+  @inject(sevice) private readonly service: sevice;
+  render(props: React.PropsWithChildren<{}>) {
+    return <div>sdaf</div>
+  }
+}
 
 const { 
   bootstrap, 
@@ -150,6 +131,7 @@ const {
 // useGlobalMiddlewares(B, { text: 'B'});
 // useGlobalMiddlewares(C, { text: 'C'});
 defineController(test)
+defineController(test2)
 
 createNotFoundComponent(() => {
   const href = useLocation(req => req.pathname);

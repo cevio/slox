@@ -1,12 +1,12 @@
 import 'reflect-metadata';
-import { ClassMetaCreator } from './classMetaCreator';
+import { ClassMetaNode } from './classMetaCreator';
 
 export class MethodMetaCreator {
 	static namespace = Symbol('metadata.method.namespace');
 	private readonly stacks: Map<string | symbol, any> = new Map();
-	public parent: ClassMetaCreator;
+	public parent: ClassMetaNode;
 
-	setParent(value: ClassMetaCreator) {
+	setParent(value: ClassMetaNode) {
 		this.parent = value;
 	}
 

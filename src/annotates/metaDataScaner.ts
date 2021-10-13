@@ -1,11 +1,11 @@
-import { ClassMetaCreator } from './classMetaCreator';
+import { ClassMetaCreator, ClassMetaNode } from './classMetaCreator';
 import { MethodMetaCreator } from './methodMetaCreator';
 import { ParameterMetaCreator } from './parameterMetaCreator';
 import { interfaces, METADATA_KEY, Container } from 'inversify';
 
 export type TClassIndefiner<T> = interfaces.Newable<T> & interfaces.Abstract<T>;
 export type TAnnotationScanerMethod = { meta: MethodMetaCreator, parameter: ParameterMetaCreator };
-export type TAnnotationScanerResult = { meta: ClassMetaCreator, methods: Map<string, TAnnotationScanerMethod> };
+export type TAnnotationScanerResult = { meta: ClassMetaNode, methods: Map<string, TAnnotationScanerMethod> };
 
 export function AnnotationMetaDataScan<T extends TClassIndefiner<X>, X = any>(classModule: T, container?: Container): TAnnotationScanerResult {
   // Auto register parent and children.
