@@ -1,7 +1,8 @@
 import React from 'react';
-import { AnnotationDependenciesAutoRegister, TClassIndefiner } from '../annotates/metaDataScaner';
+import { AnnotationDependenciesAutoRegister } from '../annotates/metaDataScaner';
 import { container } from '../index';
-import { useComponentWithClass } from '../decorators/component';
+import { useComponentWithClass, isIocComponent } from '../decorators/component';
+import { TClassComponent, TComponent, TSloxComponent } from '../interface';
 
 type TViteLoaders = Record<string, () => Promise<{
   [key: string]: any;
@@ -21,9 +22,13 @@ export function importLoadersWithVite(
     components[namespace] = React.lazy(((loader: TLoader) => {
       return async () => {
         const res = await loader();
-        AnnotationDependenciesAutoRegister(res.default as TClassIndefiner<any>, container);
+        const component = res.default as TSloxComponent<any, any>;
+        const isioc = isIocComponent(res.default as TClassComponent<any, any>);
+        if (isioc) AnnotationDependenciesAutoRegister(component as TClassComponent<any, any>, container);
         return {
-          default: useComponentWithClass(res.default as TClassIndefiner<any>),
+          default: isioc
+            ? useComponentWithClass(component as TClassComponent<any, any>)
+            : component as TComponent<any, any>
         }
       }
     })(loader));
