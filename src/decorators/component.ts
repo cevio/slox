@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClassMetaCreator, MethodMetaCreator } from '../annotates';
+import { ClassMetaCreator, MethodMetaCreator, AnnotationDependenciesAutoRegister } from '../annotates';
 import { injectable } from 'inversify';
 import { container, TClassComponent } from '..';
 import { TComponent } from '../interface';
@@ -30,6 +30,7 @@ export const WrapNamespace = Symbol('WRAP');
 
 export function useComponentWithClass<T, O>(component: TClassComponent<T, O>) {
   if (!isIocComponent(component) || !component.prototype || !component.prototype.render) throw new Error('component must be a IOC classify object.');
+  AnnotationDependenciesAutoRegister(component, container);
   const context = container.get(component);
   return componentBindContext(context.render, context);
 }
