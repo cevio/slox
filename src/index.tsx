@@ -71,8 +71,8 @@ export function createServer() {
     const cache = new Map<any, any>();
     controllers.forEach(component => {
       const meta = AnnotationMetaDataScan(component, container);
-      const controller = meta.meta.get<string>(Controller.namespace);
-      if (!controller) return;
+      const controllers = meta.meta.get<string[]>(Controller.namespace);
+      if (!controllers) return;
       const controllerMiddlewares = meta.meta.got<TMiddlewareState<any, any>[]>(Middleware.namespace, []);
       const middlewares: TMiddlewareState<any, any>[] = globalMiddlewares.concat(controllerMiddlewares).map(middleware => {
         if (!cache.has(middleware.middleware)) {
@@ -85,7 +85,9 @@ export function createServer() {
         }
       });
       middlewares.push({ middleware: useComponentWithClass(component) });
-      router.on(controller, () => set(middlewares));
+      controllers.forEach(controller => {
+        router.on(controller, () => set(middlewares));
+      })
     });
   }
 
